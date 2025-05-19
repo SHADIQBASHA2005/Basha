@@ -1,0 +1,44 @@
+import pandas as pd
+from surprise import Dataset, Reader, SVD
+from surprise.model_selection import train_test_split
+from surprise import accuracy
+
+# Sample movie ratings data
+ratings_dict = {
+    "item": ["Star Wars", "Star Wars", "Star Wars", "Avengers", "Avengers", "Inception"],
+    "user": ["Alice", "Bob", "Carol", "Alice", "Carol", "Bob"],
+    "rating": [5, 4, 5, 4, 2, 5],
+}
+df = pd.DataFrame(ratings_dict)
+
+# Convert the dataframe to Surprise format
+reader = Reader(rating_scale=(1, 5))
+data = Dataset.load_from_df(df[["user", "item", "rating"]], reader)
+
+# Train/test split
+trainset, testset = train_test_split(data, test_size=0.25)
+
+# Use SVD (Singular Value Decomposition) algorithm
+model = SVD()
+model.fit(trainset)
+
+# Predict and evaluate
+predictions = model.test(testset)
+print("RMSE:", accuracy.rmse(predictions))
+
+# Function to recommend movies
+def get_recommendations(user_id, movie_list, model):
+    predicted_ratings = []
+    for movie in movie_list:
+        pred = model.predict(user_id, movie)
+        predicted_ratings.append((movie, pred.est))
+    # Sort movies by predicted rating
+    recommended = sorted(predicted_ratings, key=lambda x: x[1], reverse=True)
+    return recommended
+
+# Example: Recommend for 'Alice'
+all_movies = df['item'].unique()
+recommendations = get_recommendations('Alice', all_movies, model)
+print("Recommendations for Alice:")
+for movie, rating in 
+:
